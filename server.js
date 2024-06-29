@@ -1,46 +1,73 @@
-const express = require("express"); 
+const express = require("express");
 const app = express();
-const mongoose = require("mongoose");
-const User = require("./models/user.js")
+const cors = require("cors");
 
-const {supabase} = require('./config') // supabase instance
+const { supabase } = require("./config"); // supabase instance
 
-const URL = "mongodb://127.0.0.1:27017/FitAdmin";
+app.use(cors({ origin: "*" }));
+app.use(express.json());
 
-main().then( () => {
-    console.log("Server connected to database.");
-})
-.catch((err) => {
-    console.log(err)
-});
-
-async function main() {
-    await mongoose.connect(URL);
-}
-
-app.get("/", (req,res) => {
-    res.send("This is root of FitAdmin");
-});
-
-app.listen(4080, () =>{
-    console.log("server is ready and listening");
-});
-
-
-async function getData() {
-    try {
-      const { data, error } = await supabase
-        .from('Gyms')
-        .select('*');
+app.post('/signup', async (req, res) => {
   
-      if (error) {
-        throw error;
-      }
-  
-      console.log('Data:', data);
-    } catch (error) {
-      console.error('Error fetching data:', error.message);
-    }
+
+  const { email, password, gymName, address, gymLogo, contact } = req.body;
+
+  if (!email || !password || !gymName || !address || !contact) {
+    return res.status(400).json({ error: 'All fields are required' });
   }
-  
-  getData();
+
+  try {
+    // Create a new user with email and password
+    const { user, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+         gymName,
+         address,
+         gymLogo,
+         contact
+        },
+      },
+    });
+
+    if (authError) {
+      throw authError;
+    }
+
+    
+
+    res.status(201).json({ message: 'Gym registered successfully', user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  console.log("========> ", req.body);
+  const { email, password } = req.body;
+
+  try {
+    // Create a new user with email and password
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return error.message;
+    }
+
+    res.status(201).json({ message: "Gym login successfully", data });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/", (req, res) => {
+  res.send("This is root of FitAdmin");
+});
+
+app.listen(4080, () => {
+  console.log("server is ready and listening");
+});
