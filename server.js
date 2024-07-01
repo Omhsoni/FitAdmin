@@ -12,7 +12,7 @@ app.use(morgan("dev"));
 app.use("/gym", gymRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Welcome to the FitAdmin");
+  res.send("Welcome to the FitAdmin...");
 });
 
 app.get("/health", (req, res) => {
