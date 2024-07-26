@@ -4,12 +4,14 @@ const cors = require("cors");
 const PORT = process.env.PORT || 4080;
 const morgan = require("morgan");
 const gymRoutes = require("./routes/gymRoutes");
+const planRoutes = require("./routes/planRoutes");
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(morgan("dev"));
 
 app.use("/gym", gymRoutes);
+app.use("/plan", planRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the FitAdmin...");
