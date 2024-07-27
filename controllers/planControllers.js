@@ -58,7 +58,7 @@ exports.addPlan = async (req, res) => {
 
 exports.getPlans = async (req, res) => {
   try {
-    const gymId = req.gym.id;
+    const {gymId} = req.params;
     const { data, error } = await supabase
       .from("Plan")
       .select("*")
