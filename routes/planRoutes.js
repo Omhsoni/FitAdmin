@@ -17,7 +17,7 @@ router.get('/', function (req, res) {
 
 // router.use(loginProtect);
 router.post('/addPlan',addPlan);
-router.get('/getPlans', getPlans);
+router.post('/getPlans', getPlans);
 router.post('/deletePlan/:planId', deletePlan);
 
 
