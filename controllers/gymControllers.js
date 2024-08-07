@@ -96,7 +96,12 @@ exports.login = async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, message: "Gym login successfully", gymData,data });
+      .json({
+        success: true,
+        message: "Gym login successfully",
+        gymData,
+        data,
+      });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
@@ -168,5 +173,37 @@ exports.resetPassword = async (req, res) => {
       error: error.message,
       message: "Failed to reset password",
     });
+  }
+};
+
+exports.updateGym = async (req, res) => {
+  const gymId = req.gym.id;
+  const { gymName, address, logo, contact, email } = req.body;
+
+  if (!gymName || !address || !contact || !email) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("Gym")
+      .update({
+        gymName,
+        address,
+        logo,
+        contact,
+        email,
+      })
+      .eq("id", gymId);
+
+    if (error) {
+      throw error;
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Gym updated successfully", data });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
