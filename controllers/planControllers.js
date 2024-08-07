@@ -3,6 +3,7 @@ const { supabase } = require("../config/supabaseClient");
 exports.addPlan = async (req, res) => {
   const gymId = req.gym.id;
   const { planName, price, validity } = req.body;
+  console.log('gymId', gymId);
 
   if (!price || !validity || !planName || !gymId) {
     return res.status(400).json({ error: "All fields are required" });
@@ -24,7 +25,7 @@ exports.addPlan = async (req, res) => {
       throw existingPlanError;
     }
 
-    const { error } = await supabase
+    const { data , error } = await supabase
       .from("Plan")
       .insert({
         planName,
@@ -38,16 +39,6 @@ exports.addPlan = async (req, res) => {
       throw error;
     }
 
-    // get all plans
-    const { data, error: plansError } = await supabase
-      .from("Plan")
-      .select("*")
-      .eq("gymId", gymId);
-
-    if (plansError) {
-      throw plansError;
-    }
-
     return res
       .status(200)
       .json({ success: true, message: "Plan added successfully", data });
@@ -58,7 +49,9 @@ exports.addPlan = async (req, res) => {
 
 exports.getPlans = async (req, res) => {
   try {
-    const {gymId} = req.params;
+    const gymId = req.gym.id;
+    console.log('gymId', gymId);
+
     const { data, error } = await supabase
       .from("Plan")
       .select("*")
@@ -96,6 +89,38 @@ exports.deletePlan = async (req, res) => {
     return res
       .status(200)
       .json({ success: true, message: "Plan deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.updatePlan = async (req, res) => {
+    const gymId = req.gym.id;
+  const { planId } = req.params;
+  const { planName, price, validity } = req.body;
+
+  if (!planId || !price || !validity || !planName) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("Plan")
+      .update({
+        planName,
+        price,
+        validity,
+      })
+      .eq("planId", planId)
+      .eq("gymId", gymId);
+
+    if (error) {
+      throw error;
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Plan updated successfully" , data});
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
